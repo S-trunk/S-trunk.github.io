@@ -1,0 +1,111 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Adding values and elements to a chart</title>
+      <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+		<style type="text/css">
+			/* No style rules here yet */
+		</style>
+	</head>
+	<body>
+
+		<script type="text/javascript">
+
+// the margin convention
+		var margin = {top: 20, right: 10, bottom: 20, left: 10};
+		var  width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+
+				d3.select("body").append("button")
+										.attr("id","button1")
+										.text(1)
+
+	  var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+// load the data, this way it treats its as a string
+//		var dati = d3.csv("stressstrain.txt", function(error, data) {
+//	  if (error) throw error;
+//  	console.log(data);
+//		});
+
+// Load the data
+	d3.csv("stressstrain.txt", function (data) {
+	dati = data.map(function(d) { return [ +d["x"], +d["y"]];});
+
+	var xScale = d3.scaleLinear()
+					 .domain([0, d3.max(dati, function(d,i) { return dati[i][0]; })])
+					 .range([margin.left, width]);
+
+	var yScale = d3.scaleLinear()
+					 .domain([0, d3.max(dati, function(d,i) { return dati[i][1]; })])
+					 .range([height, margin.top]);
+
+	var xAxis = d3.axisBottom()
+						.scale(xScale);
+
+	var yAxis = d3.axisLeft()
+						.scale(yScale);
+
+	svg.append("g").call(xAxis)
+					 		.attr("transform", "translate(" + 10 + "," + height + ")");
+	svg.append("g").call(yAxis)
+					 		.attr("transform", "translate(" + 20 + "," + 0 + ")");
+
+	svg.selectAll("circle")
+	.data(dati)
+	.enter()
+	.append("circle")
+	.attr("cx", function (d, i){
+		return dati[i][0]+20;
+	})
+	.attr("cy", function(d, i) {
+		return -dati[i][1]+height;
+	})
+	.attr("r", 10)
+	.attr("stroke", "black")
+	.attr("fill", "green");
+
+
+
+	d3.select("#button1")
+ .on("click", function repeat() {
+	svg.selectAll("circle")
+					.data(dati)
+					.transition()
+					.duration(500)
+					.delay (function (d,i){	return i*20;})
+					.attr("cx", function (d, i){ return dati[i][1]+20;})
+					.attr("cy", function(d, i) { return -dati[i][0]+height;})
+					.attr("r", 10)
+					.attr("stroke", "black")
+					.attr("fill", "blue")
+			    .transition()
+					.duration(500)
+					.delay(700)
+					.attr("cx", function (d, i){ return dati[i][0]+20;})
+					.attr("cy", function(d, i) { return -dati[i][1]+height;})
+					.attr("r", 10)
+					.attr("stroke", "black")
+					.attr("fill", "green")
+					.on("end", repeat);
+					});
+
+	//.on("end",repeat);
+	});
+
+
+
+
+
+
+
+		</script>
+	</body>
+</html>
